@@ -13,7 +13,23 @@
       "Bash(npm run *)",
       "Bash(Get-ChildItem *)",
       "Skill(update-config)",
-      "Skill(component:add-component)"
+      "Skill(component:add-component)",
+      "Bash(git commit -m ' *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "코드 리뷰를 수행해주세요. 방금 작성/수정된 코드 파일을 분석하여 전문적인 리뷰를 제공해주세요. 코드 품질, 타입 안정성, React/Next.js 패턴, 성능, 보안을 중점적으로 검토하세요.",
+            "statusMessage": "🔍 코드 리뷰 진행 중...",
+            "timeout": 120
+          }
+        ]
+      }
     ]
   },
   "enableAllProjectMcpServers": true,
