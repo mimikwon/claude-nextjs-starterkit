@@ -1,10 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Mail, Share2, Gift, Send } from 'lucide-react';
+import { Mail, AlertCircle, CheckCircle, Loader } from 'lucide-react';
+import { contactSchema, type ContactFormData } from '@/lib/validation';
+import { useFormSubmit } from '@/hooks/useFormSubmit';
 
 interface SocialLink {
   name: string;
@@ -19,29 +22,30 @@ interface ContactSectionProps {
 
 /**
  * 연락처 섹션
+ * React Hook Form + Zod를 사용한 폼 검증 포함
  * - 이메일 주소 표시
  * - 소셜 미디어 링크
- * - 간단한 메시지 폼 (또는 이메일 링크)
+ * - 메시지 폼
  */
 export function ContactSection({ email, socialLinks }: ContactSectionProps) {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactSchema),
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const { isLoading, error, success, handleSubmit: submitForm } = useFormSubmit();
 
-    // 실제 구현 시 이메일 전송 서비스 연동
-    // 예: Resend, SendGrid, Nodemailer 등
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    alert('메시지가 전송되었습니다!');
-    setFormData({ name: '', email: '', message: '' });
-    setIsSubmitting(false);
+  const onSubmit = async (data: ContactFormData) => {
+    await submitForm(async () => {
+      // 실제 구현 시 이메일 전송 서비스 연동
+      // 예: Resend, SendGrid, Nodemailer 등
+      // await sendEmailAPI(data);
+      console.log('메시지 전송:', data);
+    }, reset);
   };
 
   return (
@@ -121,9 +125,25 @@ export function ContactSection({ email, socialLinks }: ContactSectionProps) {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
             viewport={{ once: true }}
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-4"
           >
+            {/* 에러 메시지 */}
+            {error && (
+              <div className="flex items-center gap-2 rounded-md bg-destructive/10 px-4 py-2 text-sm text-destructive">
+                <AlertCircle className="h-4 w-4" />
+                {error}
+              </div>
+            )}
+
+            {/* 성공 메시지 */}
+            {success && (
+              <div className="flex items-center gap-2 rounded-md bg-green-50 px-4 py-2 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
+                <CheckCircle className="h-4 w-4" />
+                메시지가 전송되었습니다
+              </div>
+            )}
+
             {/* 이름 입력 */}
             <div>
               <label
@@ -136,12 +156,13 @@ export function ContactSection({ email, socialLinks }: ContactSectionProps) {
                 id="name"
                 type="text"
                 placeholder="이름을 입력하세요"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required
+                {...register("name")}
+                aria-invalid={!!errors.name}
+                disabled={isLoading}
               />
+              {errors.name && (
+                <p className="text-xs text-destructive mt-1">{errors.name.message}</p>
+              )}
             </div>
 
             {/* 이메일 입력 */}
@@ -156,12 +177,13 @@ export function ContactSection({ email, socialLinks }: ContactSectionProps) {
                 id="email"
                 type="email"
                 placeholder="이메일을 입력하세요"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                required
+                {...register("email")}
+                aria-invalid={!!errors.email}
+                disabled={isLoading}
               />
+              {errors.email && (
+                <p className="text-xs text-destructive mt-1">{errors.email.message}</p>
+              )}
             </div>
 
             {/* 메시지 입력 */}
@@ -174,24 +196,26 @@ export function ContactSection({ email, socialLinks }: ContactSectionProps) {
               </label>
               <textarea
                 id="message"
-                placeholder="메시지를 입력하세요"
+                placeholder="메시지를 입력하세요 (최소 10자)"
                 rows={4}
-                value={formData.message}
-                onChange={(e) =>
-                  setFormData({ ...formData, message: e.target.value })
-                }
-                required
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                {...register("message")}
+                aria-invalid={!!errors.message}
+                disabled={isLoading}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
               />
+              {errors.message && (
+                <p className="text-xs text-destructive mt-1">{errors.message.message}</p>
+              )}
             </div>
 
             {/* 전송 버튼 */}
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isLoading}
               className="w-full"
             >
-              {isSubmitting ? '전송 중...' : '메시지 전송'}
+              {isLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
+              {isLoading ? '전송 중...' : '메시지 전송'}
             </Button>
           </motion.form>
         </div>

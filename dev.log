@@ -1,0 +1,32 @@
+
+> my-app@0.1.0 dev
+> next dev --turbopack
+
+ ⚠ Port 3000 is in use by process 19824, using available port 3003 instead.
+   ▲ Next.js 15.5.18 (Turbopack)
+   - Local:        http://localhost:3003
+   - Network:      http://192.168.162.165:3003
+
+ ✓ Starting...
+ ✓ Ready in 3.8s
+ ○ Compiling /portfolio ...
+ ✓ Compiled /portfolio in 12.6s
+ GET /portfolio 200 in 18136ms
+ GET /portfolio 200 in 869ms
+ GET /portfolio 200 in 809ms
+ GET /portfolio 200 in 330ms
+ GET /portfolio 200 in 306ms
+ GET /portfolio 200 in 384ms
+ GET /portfolio 200 in 368ms
+ GET /portfolio 200 in 805ms
+ GET /portfolio 200 in 363ms
+ GET /portfolio 200 in 360ms
+ GET /portfolio 200 in 652ms
+ GET /portfolio 200 in 363ms
+ GET /portfolio 200 in 385ms
+ ✓ Compiled in 242ms
+ ✓ Compiled in 946ms
+ ✓ Compiled in 381ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /portfolio 200 in 1451ms
+ ✓ Compiled in 236ms

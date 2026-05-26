@@ -1,27 +1,40 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GitBranch, Mail } from "lucide-react";
+import { GitBranch, Mail, AlertCircle, CheckCircle, Loader } from "lucide-react";
+import { loginSchema, type LoginFormData } from "@/lib/validation";
+import { useFormSubmit } from "@/hooks/useFormSubmit";
 
 /**
  * 로그인 폼 컴포넌트
- * 이메일/비밀번호 입력, 소셜 로그인 옵션을 포함합니다
+ * React Hook Form + Zod를 사용한 폼 검증 포함
  */
 export function LoginForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    // 실제 로그인 로직은 여기에 구현
-    setTimeout(() => setIsLoading(false), 1000);
+  const { isLoading, error, success, handleSubmit: submitForm } = useFormSubmit();
+
+  const onSubmit = async (data: LoginFormData) => {
+    await submitForm(async () => {
+      // 실제 로그인 로직은 여기에 구현
+      // 예: await loginAPI(data);
+      console.log("로그인 시도:", data);
+      // 서버 액션 또는 API 호출 예시
+      // await signIn("credentials", data);
+    }, reset);
   };
 
   return (
@@ -33,8 +46,24 @@ export function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* 에러 메시지 */}
+        {error && (
+          <div className="flex items-center gap-2 rounded-md bg-destructive/10 px-4 py-2 text-sm text-destructive">
+            <AlertCircle className="h-4 w-4" />
+            {error}
+          </div>
+        )}
+
+        {/* 성공 메시지 */}
+        {success && (
+          <div className="flex items-center gap-2 rounded-md bg-green-50 px-4 py-2 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
+            <CheckCircle className="h-4 w-4" />
+            로그인이 완료되었습니다
+          </div>
+        )}
+
         {/* 이메일/비밀번호 폼 */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* 이메일 입력 */}
           <div className="space-y-2">
             <Label htmlFor="email">이메일</Label>
@@ -42,10 +71,13 @@ export function LoginForm() {
               id="email"
               type="email"
               placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              {...register("email")}
+              aria-invalid={!!errors.email}
+              disabled={isLoading}
             />
+            {errors.email && (
+              <p className="text-xs text-destructive">{errors.email.message}</p>
+            )}
           </div>
 
           {/* 비밀번호 입력 */}
@@ -63,10 +95,13 @@ export function LoginForm() {
               id="password"
               type="password"
               placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
+              {...register("password")}
+              aria-invalid={!!errors.password}
+              disabled={isLoading}
             />
+            {errors.password && (
+              <p className="text-xs text-destructive">{errors.password.message}</p>
+            )}
           </div>
 
           {/* 로그인 버튼 */}
@@ -75,6 +110,7 @@ export function LoginForm() {
             className="w-full"
             disabled={isLoading}
           >
+            {isLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
             {isLoading ? "로그인 중..." : "로그인"}
           </Button>
         </form>
@@ -95,6 +131,7 @@ export function LoginForm() {
             type="button"
             variant="outline"
             className="w-full gap-2"
+            disabled={isLoading}
           >
             <Mail className="h-4 w-4" />
             Google로 로그인
@@ -103,6 +140,7 @@ export function LoginForm() {
             type="button"
             variant="outline"
             className="w-full gap-2"
+            disabled={isLoading}
           >
             <GitBranch className="h-4 w-4" />
             GitHub로 로그인

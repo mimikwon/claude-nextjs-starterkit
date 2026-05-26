@@ -1,36 +1,41 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GitBranch, Mail } from "lucide-react";
+import { GitBranch, Mail, AlertCircle, CheckCircle, Loader } from "lucide-react";
+import { registerSchema, type RegisterFormData } from "@/lib/validation";
+import { useFormSubmit } from "@/hooks/useFormSubmit";
 
 /**
  * 회원가입 폼 컴포넌트
- * 이름, 이메일, 비밀번호, 비밀번호 확인 입력을 포함합니다
+ * React Hook Form + Zod를 사용한 폼 검증 포함
+ * 비밀번호 일치 확인 로직 포함
  */
 export function RegisterForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const { isLoading, error, success, handleSubmit: submitForm } = useFormSubmit();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    // 실제 가입 로직은 여기에 구현
-    setTimeout(() => setIsLoading(false), 1000);
+  const onSubmit = async (data: RegisterFormData) => {
+    await submitForm(async () => {
+      // 실제 가입 로직은 여기에 구현
+      // 예: await registerAPI(data);
+      console.log("회원가입 시도:", data);
+      // 서버 액션 또는 API 호출 예시
+      // await signUp(data);
+    }, reset);
   };
 
   return (
@@ -42,20 +47,38 @@ export function RegisterForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* 에러 메시지 */}
+        {error && (
+          <div className="flex items-center gap-2 rounded-md bg-destructive/10 px-4 py-2 text-sm text-destructive">
+            <AlertCircle className="h-4 w-4" />
+            {error}
+          </div>
+        )}
+
+        {/* 성공 메시지 */}
+        {success && (
+          <div className="flex items-center gap-2 rounded-md bg-green-50 px-4 py-2 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
+            <CheckCircle className="h-4 w-4" />
+            회원가입이 완료되었습니다
+          </div>
+        )}
+
         {/* 회원가입 폼 */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* 이름 입력 */}
           <div className="space-y-2">
             <Label htmlFor="name">이름</Label>
             <Input
               id="name"
-              name="name"
               type="text"
               placeholder="홍길동"
-              value={formData.name}
-              onChange={handleChange}
-              required
+              {...register("name")}
+              aria-invalid={!!errors.name}
+              disabled={isLoading}
             />
+            {errors.name && (
+              <p className="text-xs text-destructive">{errors.name.message}</p>
+            )}
           </div>
 
           {/* 이메일 입력 */}
@@ -63,13 +86,15 @@ export function RegisterForm() {
             <Label htmlFor="email">이메일</Label>
             <Input
               id="email"
-              name="email"
               type="email"
               placeholder="your@email.com"
-              value={formData.email}
-              onChange={handleChange}
-              required
+              {...register("email")}
+              aria-invalid={!!errors.email}
+              disabled={isLoading}
             />
+            {errors.email && (
+              <p className="text-xs text-destructive">{errors.email.message}</p>
+            )}
           </div>
 
           {/* 비밀번호 입력 */}
@@ -77,16 +102,19 @@ export function RegisterForm() {
             <Label htmlFor="password">비밀번호</Label>
             <Input
               id="password"
-              name="password"
               type="password"
               placeholder="••••••••"
-              value={formData.password}
-              onChange={handleChange}
-              required
+              {...register("password")}
+              aria-invalid={!!errors.password}
+              disabled={isLoading}
             />
-            <p className="text-xs text-muted-foreground">
-              최소 8자, 대문자, 숫자를 포함해야 합니다
-            </p>
+            {errors.password ? (
+              <p className="text-xs text-destructive">{errors.password.message}</p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                최소 8자 이상이어야 합니다
+              </p>
+            )}
           </div>
 
           {/* 비밀번호 확인 */}
@@ -94,13 +122,15 @@ export function RegisterForm() {
             <Label htmlFor="confirmPassword">비밀번호 확인</Label>
             <Input
               id="confirmPassword"
-              name="confirmPassword"
               type="password"
               placeholder="••••••••"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
+              {...register("confirmPassword")}
+              aria-invalid={!!errors.confirmPassword}
+              disabled={isLoading}
             />
+            {errors.confirmPassword && (
+              <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
+            )}
           </div>
 
           {/* 회원가입 버튼 */}
@@ -109,6 +139,7 @@ export function RegisterForm() {
             className="w-full"
             disabled={isLoading}
           >
+            {isLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
             {isLoading ? "가입 중..." : "회원가입"}
           </Button>
         </form>
@@ -129,6 +160,7 @@ export function RegisterForm() {
             type="button"
             variant="outline"
             className="w-full gap-2"
+            disabled={isLoading}
           >
             <Mail className="h-4 w-4" />
             Google으로 가입
@@ -137,6 +169,7 @@ export function RegisterForm() {
             type="button"
             variant="outline"
             className="w-full gap-2"
+            disabled={isLoading}
           >
             <GitBranch className="h-4 w-4" />
             GitHub으로 가입

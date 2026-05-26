@@ -5,16 +5,19 @@ import {
   LayoutDashboard,
   Settings,
   LogOut,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-// 아이콘 매핑
+// 아이콘 매핑 - 타입 안정성 강화
+type IconKey = keyof typeof ICON_MAP;
+
 const ICON_MAP = {
   LayoutDashboard,
   Settings,
   LogOut,
-};
+} as const;
 
 /**
  * 대시보드 사이드바 컴포넌트
@@ -34,7 +37,13 @@ export function Sidebar() {
       {/* 네비게이션 메뉴 */}
       <nav className="flex-1 space-y-2">
         {DASHBOARD_NAV_LINKS.map((link) => {
-          const Icon = ICON_MAP[link.icon as keyof typeof ICON_MAP];
+          // 타입 안정성 강화: iconName이 유효한지 확인
+          if (!(link.icon in ICON_MAP)) {
+            console.warn(`Unknown icon: ${link.icon}`);
+            return null;
+          }
+
+          const Icon = ICON_MAP[link.icon as IconKey] as LucideIcon;
           return (
             <Link
               key={link.href}
