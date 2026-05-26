@@ -8,7 +8,12 @@
       "Bash(curl -s http://localhost:3000)",
       "Bash(curl -s http://localhost:3000/portfolio)",
       "Bash(git add *)",
-      "Bash(git commit -m '포트폴리오 스타터킷 구현 완료 *)"
+      "Bash(git commit -m '포트폴리오 스타터킷 구현 완료 *)",
+      "Bash(git commit -m 'README 업데이트: 포트폴리오 스타터킷 완전 가이드 *)",
+      "Bash(npm run *)",
+      "Bash(Get-ChildItem *)",
+      "Skill(update-config)",
+      "Skill(component:add-component)"
     ]
   },
   "enableAllProjectMcpServers": true,
