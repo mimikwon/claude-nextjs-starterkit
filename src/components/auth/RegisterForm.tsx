@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Github, Mail } from "lucide-react";
+import { GitBranch, Mail } from "lucide-react";
 
 /**
  * 회원가입 폼 컴포넌트
@@ -138,7 +138,7 @@ export function RegisterForm() {
             variant="outline"
             className="w-full gap-2"
           >
-            <Github className="h-4 w-4" />
+            <GitBranch className="h-4 w-4" />
             GitHub으로 가입
           </Button>
         </div>

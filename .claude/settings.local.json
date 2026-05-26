@@ -3,7 +3,17 @@
     "allow": [
       "Bash(cp -r ./my-app/* .)",
       "Bash(cp -r ./my-app/.[!.]* .)",
-      "Bash(rm -rf ./my-app)"
+      "Bash(rm -rf ./my-app)",
+      "mcp__playwright",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(curl -s http://localhost:3000/portfolio)",
+      "Bash(git add *)",
+      "Bash(git commit -m '포트폴리오 스타터킷 구현 완료 *)"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "playwright_run",
+    "playwright_test"
+  ]
 }
